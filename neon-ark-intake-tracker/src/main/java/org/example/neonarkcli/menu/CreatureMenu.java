@@ -12,6 +12,7 @@ import java.util.Scanner;
 /**
  * CreatureMenu is the user interaction layer for the Neon Ark CLI.
  * Each numbered option maps to exactly one HTTP request per the contract.
+ * No business rules live here — all data flows through HttpCreatureApiClient.
  */
 public class CreatureMenu {
 
@@ -217,26 +218,26 @@ public class CreatureMenu {
         CreatureWithObservations data = result.data;
 
         System.out.println();
-        System.out.println("  -- Creature Details --------------------------------");
+        System.out.println("  -- Creature Details " + "-".repeat(80));
         printCreatureTable(List.of(data.creature));
 
         System.out.println();
-        System.out.println("  -- Observations ------------------------------------");
+        System.out.println("  -- Observations " + "-".repeat(84));
 
         if (data.observations.isEmpty()) {
             System.out.println("  No observations recorded for this creature.");
             return;
         }
 
-        String fmt     = "  %-6s  %-20s  %-22s  %s%n";
-        String divider = "  " + "-".repeat(90);
+        String fmt     = "  %-6s  %-20s  %-22s  %-45s%n";
+        String divider = "  " + "-".repeat(100);
 
-        System.out.printf(fmt, "ID", "AUTHOR", "OBSERVED AT", "NOTES");
+        System.out.printf(fmt, "ID", "AUTHOR", "OBSERVED AT", "NOTES (truncated)");
         System.out.println(divider);
 
         for (Observation obs : data.observations) {
-            String shortNotes = obs.getNotes().length() > 50
-                    ? obs.getNotes().substring(0, 47) + "..."
+            String shortNotes = obs.getNotes().length() > 45
+                    ? obs.getNotes().substring(0, 42) + "..."
                     : obs.getNotes();
             String time = obs.getObservedAt().length() > 19
                     ? obs.getObservedAt().substring(0, 19)
@@ -246,6 +247,19 @@ public class CreatureMenu {
 
         System.out.println(divider);
         System.out.printf("  Total observations: %d%n", data.observations.size());
+
+        // Print full notes below the table
+        System.out.println();
+        System.out.println("  -- Full Observation Notes " + "-".repeat(74));
+        for (Observation obs : data.observations) {
+            String time = obs.getObservedAt().length() > 19
+                    ? obs.getObservedAt().substring(0, 19)
+                    : obs.getObservedAt();
+            System.out.println();
+            System.out.printf("  [#%d] %s — %s%n", obs.getId(), obs.getAuthorName(), time);
+            System.out.println("  " + obs.getNotes());
+        }
+        System.out.println();
     }
 
     // ── 7. Find creatures by feeding time ─────────────────────────────────────
@@ -309,8 +323,9 @@ public class CreatureMenu {
     // ── Shared display helpers ────────────────────────────────────────────────
 
     private void printCreatureTable(List<Creature> creatures) {
-        String fmt     = "  %-6s  %-18s  %-18s  %-10s  %-14s  %-9s  %s%n";
-        String divider = "  " + "-".repeat(105);
+        String fmt     = "  %-6s  %-18s  %-18s  %-8s  %-14s  %-8s  %s%n";
+        // 2 + 6 + 2 + 18 + 2 + 18 + 2 + 8 + 2 + 14 + 2 + 8 + 2 + ~30 (habitat) = ~100
+        String divider = "  " + "-".repeat(100);
 
         System.out.println();
         System.out.printf(fmt, "ID", "NAME", "SPECIES", "DANGER", "CONDITION", "STATUS", "HABITAT");
