@@ -1,9 +1,10 @@
 package org.example.neonarkintaketracker.dto;
 
 import java.time.Instant;
+import java.util.List;
 
-// READ response — includes server-managed fields and habitat name for display
-public record CreatureResponse(
+// Full creature snapshot with all observations — used for menu option 6
+public record CreatureWithObservationsResponse(
         Long id,
         String name,
         String species,
@@ -11,5 +12,6 @@ public record CreatureResponse(
         String condition,
         String status,
         String habitatName,
-        Instant createdAt
+        Instant createdAt,
+        List<ObservationResponse> observations
 ) {}

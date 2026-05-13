@@ -5,7 +5,6 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -31,6 +30,10 @@ public class Creature {
     @Column(nullable = false, length = 30)
     private String condition;
 
+    // ACTIVE or REMOVED (soft delete)
+    @Column(nullable = false, length = 30)
+    private String status = "ACTIVE";
+
     @Column(columnDefinition = "TEXT")
     private String notes;
 
@@ -39,7 +42,6 @@ public class Creature {
     private Habitat habitat;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 }
-
